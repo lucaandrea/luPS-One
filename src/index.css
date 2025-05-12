@@ -131,6 +131,27 @@
   }
 }
 
+@font-face {
+  font-family: "Industry Inc";
+  src: url("/fonts/IndustryInc-Base.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -139,13 +160,107 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: "ChicagoKare", "ArkPixel", "SerenityOS-Emoji", system-ui,
-      -apple-system, sans-serif;
-    -webkit-font-smoothing: none;
-    font-smooth: never;
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
     overflow: hidden;
     position: fixed;
     inset: 0;
+    background-color: #000;
+  }
+
+  /* PS1-inspired global styles */
+  .ps-crt {
+    position: relative;
+  }
+
+  .ps-crt::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.5),
+      rgba(0, 0, 0, 0.5) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  .ps-crt::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+      circle at center,
+      transparent 60%,
+      rgba(0, 0, 0, 0.8) 100%
+    );
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0.2;
+  }
+
+  .ps-noise {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/assets/noise.png');
+    pointer-events: none;
+    z-index: 9997;
+    opacity: 0.08;
+    mix-blend-mode: overlay;
+  }
+
+  .ps-memory-card {
+    background-color: theme('colors.ps.plastic');
+    border-radius: 4px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.5);
+    transition: all 260ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  .ps-memory-card:hover, .ps-memory-card:focus {
+    transform: scale(1.05);
+  }
+
+  .ps-memory-card:focus {
+    box-shadow:
+      0 0 0 2px rgba(0, 0, 0, 0.8),
+      0 0 0 4px theme('colors.ps.red'),
+      0 0 0 6px theme('colors.ps.amber'),
+      0 0 0 8px theme('colors.ps.cyan'),
+      0 0 0 10px theme('colors.ps.green');
+  }
+
+  .ps-glow {
+    animation: ps-glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes ps-glow {
+    0% {
+      box-shadow: 0 0 5px theme('colors.ps.red');
+    }
+    25% {
+      box-shadow: 0 0 5px theme('colors.ps.amber');
+    }
+    50% {
+      box-shadow: 0 0 5px theme('colors.ps.cyan');
+    }
+    75% {
+      box-shadow: 0 0 5px theme('colors.ps.green');
+    }
+    100% {
+      box-shadow: 0 0 5px theme('colors.ps.red');
+    }
   }
 }
 

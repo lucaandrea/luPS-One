@@ -1,6 +1,6 @@
-# ryOS — A web-based OS experience, made with Cursor
+# luPS-One
 
-A modern web-based desktop environment inspired by classic macOS, built with a cutting-edge web stack and AI. Features multiple built-in applications and a familiar desktop interface. Works on all devices—including mobile, tablet, and desktop.
+luPS-One is a PlayStation-1–inspired web desktop that chronicles Luca Collins' journey from war-torn childhood to AI product leader and motorsport tinkerer. Built with Next 13, Tailwind CSS, Framer-motion, and React-Three-Fiber, it boots like a 1995 console, speaks like a 2025 LLM, and ships via Vercel.
 
 ## Features
 

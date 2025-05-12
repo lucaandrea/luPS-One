@@ -15,84 +15,93 @@ export function BootScreen({
   isOpen,
   onOpenChange,
   onBootComplete,
-  title = "System Restoring...",
+  title = "System Boot",
 }: BootScreenProps) {
   const { play } = useSound(Sounds.BOOT, 0.5);
-  const [progress, setProgress] = useState(0);
-  
+  const [step, setStep] = useState(0);
+
   useEffect(() => {
-    let interval: number;
-    let timer: number;
-    let soundTimer: number;
-    
+    let timers: number[] = [];
+
     if (isOpen) {
-      // Play boot sound with a delay
-      soundTimer = window.setTimeout(() => {
+      // Initial state (step 0) - only "LUCA" logo visible
+
+      // At 800ms, show PS swoosh (step 1)
+      timers.push(window.setTimeout(() => {
+        setStep(1);
+      }, 800));
+
+      // At 1200ms, play boot chime and flash screen white (step 2)
+      timers.push(window.setTimeout(() => {
         play();
-      }, 100);
-      
-      // Simulate boot progress
-      interval = window.setInterval(() => {
-        setProgress((prev) => {
-          const newProgress = prev + Math.random() * 10;
-          return newProgress >= 100 ? 100 : newProgress;
-        });
-      }, 100);
-      
-      // Close after boot completes (2 seconds)
-      timer = window.setTimeout(() => {
-        window.clearInterval(interval);
-        setProgress(100);
-        
-        // Wait a moment at 100% before completing
-        const completeTimer = window.setTimeout(() => {
-          onBootComplete?.();
-          onOpenChange(false);
-        }, 500);
-        
-        return () => window.clearTimeout(completeTimer);
-      }, 2000);
-    } else {
-      setProgress(0);
+        setStep(2);
+
+        // Briefly flash white, then back to normal
+        timers.push(window.setTimeout(() => {
+          setStep(3);
+        }, 80));
+      }, 1200));
+
+      // At 2500ms, fade to home screen
+      timers.push(window.setTimeout(() => {
+        // Store boot flag in localStorage
+        localStorage.setItem('lupsOneBootSeen', 'true');
+
+        // Complete boot sequence
+        onBootComplete?.();
+        onOpenChange(false);
+      }, 2500));
     }
-    
+
     return () => {
-      window.clearInterval(interval);
-      window.clearTimeout(timer);
-      window.clearTimeout(soundTimer);
+      timers.forEach(timer => window.clearTimeout(timer));
     };
   }, [isOpen, play, onBootComplete, onOpenChange]);
-  
+
   if (!isOpen) return null;
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={() => {}} modal>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay 
-          className="fixed inset-0 z-[75] bg-neutral-500/90 backdrop-blur-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+        <DialogPrimitive.Overlay
+          className={`fixed inset-0 z-[75] bg-black ${step === 2 ? 'bg-white' : 'bg-black'} data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0`}
           style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
         />
-        <DialogContent 
-          className=" bg-neutral-100 p-0 w-[calc(100%-24px)] border-none shadow-xl max-w-lg z-[80] outline-none"
+        <DialogContent
+          className="bg-transparent w-full h-full border-none max-w-none z-[80] outline-none"
           style={{ position: 'fixed', zIndex: 80 }}
         >
           <VisuallyHidden>
-            <DialogTitle>{title}</DialogTitle>
+            <DialogTitle>PlayStation Boot Screen</DialogTitle>
           </VisuallyHidden>
-          <div className="flex flex-col items-center justify-center p-8 min-h-[300px] w-full">
-            <div className="flex flex-col items-center justify-center border border-neutral-200 bg-white p-8 w-full pb-4">
-                <img src="/assets/macos.svg" alt="macOS" className="w-64 h-32" />
-                <h1 className="text-[36px] font-mondwest mt-4 mb-0">
-                  <span className="text-blue-500">ry</span>OS 8.2
-                </h1>
+          <div className="flex flex-col items-center justify-center w-full h-full">
+            <h1 className="text-[72px] text-ps-plastic">LUCA</h1>
+
+            {/* PS Swoosh - only visible in step 1+ */}
+            <div
+              className={`mt-4 transition-opacity duration-300 ${step >= 1 ? 'opacity-100' : 'opacity-0'}`}
+              aria-hidden="true"
+            >
+              <div className="relative w-72 h-16">
+                {/* Recreate the PS swoosh with divs */}
+                <div className="absolute w-full h-4 bg-ps-red rounded-full transform -rotate-45"></div>
+                <div className="absolute w-full h-4 bg-ps-amber rounded-full transform rotate-[15deg] translate-y-2"></div>
+                <div className="absolute w-full h-4 bg-ps-cyan rounded-full transform rotate-[30deg] translate-y-4"></div>
+                <div className="absolute w-full h-4 bg-ps-green rounded-full transform rotate-[45deg] translate-y-6"></div>
+              </div>
             </div>
-            <h2 className="text-[16px] font-chicago mt-4 mb-1">{title}</h2>
-            <div className="w-[50%] h-3 border-1 border-neutral-500 rounded-sm overflow-hidden">
-              <div 
-                className="h-full bg-neutral-900 transition-all duration-200"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
+
+            {/* Skip animation link for a11y */}
+            <button
+              className="sr-only focus:not-sr-only mt-8 text-white underline"
+              onClick={() => {
+                localStorage.setItem('lupsOneBootSeen', 'true');
+                onBootComplete?.();
+                onOpenChange(false);
+              }}
+            >
+              Skip Animation
+            </button>
           </div>
         </DialogContent>
       </DialogPrimitive.Portal>

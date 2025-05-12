@@ -8,14 +8,14 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <meta name="apple-mobile-web-app-title" content="ryOS" />
+    <meta name="apple-mobile-web-app-title" content="luPS-One" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, viewport-fit=cover"
     />
     <meta
       name="description"
-      content="A web-based OS experience, made with Cursor"
+      content="A PlayStation-1-inspired web desktop that chronicles Luca Collins' journey from war-torn childhood to AI product leader and motorsport tinkerer."
     />
     <meta name="theme-color" content="#000000" />
     <meta http-equiv="Permissions-Policy" content="camera=(self)" />
@@ -23,30 +23,46 @@
     <!-- Cache control -->
     <meta http-equiv="Cache-Control" content="max-age=86400" />
 
+    <!-- Preload critical assets -->
+    <link rel="preload" href="/fonts/IndustryInc-Base.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/sounds/boot_chime.ogg" as="audio" type="audio/ogg">
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://os.ryo.lu/" />
-    <meta property="og:title" content="ryOS" />
+    <meta property="og:url" content="https://luca.ooo/" />
+    <meta property="og:title" content="luPS-One // Luca Collins" />
     <meta
       property="og:description"
-      content="A web-based OS experience, made with Cursor"
+      content="A PlayStation-1-inspired web desktop that chronicles Luca Collins' journey from war-torn childhood to AI product leader and motorsport tinkerer."
     />
-    <meta property="og:image" content="https://os.ryo.lu/icons/mac-512.png" />
-    <meta property="og:site_name" content="ryOS" />
+    <meta property="og:image" content="https://luca.ooo/images/og-image.png" />
+    <meta property="og:site_name" content="luPS-One" />
 
     <!-- Twitter Card -->
     <meta property="twitter:card" content="summary" />
-    <meta property="twitter:title" content="ryOS" />
+    <meta property="twitter:title" content="luPS-One // Luca Collins" />
     <meta
       property="twitter:description"
-      content="A web-based OS experience, made with Cursor"
+      content="A PlayStation-1-inspired web desktop that chronicles Luca Collins' journey from war-torn childhood to AI product leader and motorsport tinkerer."
     />
     <meta
       property="twitter:image"
-      content="https://os.ryo.lu/icons/mac-512.png"
+      content="https://luca.ooo/images/og-image.png"
     />
 
-    <title>ryOS</title>
+    <!-- Structured data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Luca Andrea Collins",
+        "jobTitle": "Senior Director of AI Product & Strategy",
+        "url": "https://luca.ooo"
+      }
+    </script>
+
+    <title>luPS-One // Luca Collins</title>
   </head>
   <body style="background-color: black">
     <div id="root"></div>

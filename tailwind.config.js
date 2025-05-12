@@ -55,14 +55,13 @@ module.exports = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        system7: {
-          "window-bg": "#FFFFFF",
-          "menubar-bg": "#FFFFFF",
-          "title-bar": "#000000",
-          "title-text": "#FFFFFF",
-          border: "#000000",
-          "button-highlight": "#FFFFFF",
-          "button-shadow": "#808080",
+        ps: {
+          "plastic": "#c0c0c0",
+          "crt-glass": "#1c1c1c",
+          "red": "#e4002b",
+          "amber": "#ff9400",
+          "cyan": "#0098de",
+          "green": "#0cba3e",
         },
         chart: {
           1: "hsl(var(--chart-1))",
@@ -144,6 +143,27 @@ module.exports = {
       addBase({
         img: {
           "image-rendering": "pixelated",
+        },
+        h1: {
+          "font-family": "'Industry Inc', Eurostile, sans-serif",
+          "font-weight": "700",
+          "letter-spacing": "0.04em",
+          "text-transform": "uppercase",
+          "font-smooth": "never",
+          "image-rendering": "pixelated",
+        },
+        h2: {
+          "font-family": "'Industry Inc', Eurostile, sans-serif",
+          "font-weight": "700",
+          "letter-spacing": "0.04em",
+          "text-transform": "uppercase",
+          "font-smooth": "never",
+          "image-rendering": "pixelated",
+        },
+        body: {
+          "font-family": "Inter, sans-serif",
+          "font-weight": "400",
+          "background-color": "#000",
         },
       });
     },
