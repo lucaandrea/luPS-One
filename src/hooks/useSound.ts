@@ -77,20 +77,39 @@ if (typeof document !== "undefined" && typeof window !== "undefined") {
 }
 
 // Preload a single sound and add it to cache
-const preloadSound = async (soundPath: string): Promise<AudioBuffer> => {
+const preloadSound = async (soundPath: string): Promise<AudioBuffer | null> => {
   if (audioBufferCache.has(soundPath)) {
     return audioBufferCache.get(soundPath)!;
   }
 
   try {
     const response = await fetch(soundPath);
+
+    // Check if the response was successful
+    if (!response.ok) {
+      console.warn(`Sound file not found: ${soundPath}`);
+      return null;
+    }
+
     const arrayBuffer = await response.arrayBuffer();
-    const audioBuffer = await getAudioContext().decodeAudioData(arrayBuffer);
-    audioBufferCache.set(soundPath, audioBuffer);
-    return audioBuffer;
+
+    // Check if we have actual content
+    if (arrayBuffer.byteLength === 0) {
+      console.warn(`Sound file is empty: ${soundPath}`);
+      return null;
+    }
+
+    try {
+      const audioBuffer = await getAudioContext().decodeAudioData(arrayBuffer);
+      audioBufferCache.set(soundPath, audioBuffer);
+      return audioBuffer;
+    } catch (decodeError) {
+      console.warn(`Failed to decode audio data for ${soundPath}:`, decodeError);
+      return null;
+    }
   } catch (error) {
-    console.error("Error loading sound:", error);
-    throw error;
+    console.warn(`Error loading sound: ${soundPath}`, error);
+    return null;
   }
 };
 
@@ -126,8 +145,15 @@ export function useSound(soundPath: string, volume: number = 0.3) {
     try {
       // Ensure audio context is running before playing
       await resumeAudioContext();
-      
+
       const audioBuffer = await preloadSound(soundPath);
+
+      // If no valid audio buffer was loaded, skip playback
+      if (!audioBuffer) {
+        console.debug(`Skipping playback of ${soundPath} - no valid audio buffer`);
+        return;
+      }
+
       // If the gain node belongs to a stale AudioContext (closed), recreate it
       if (!gainNodeRef.current || gainNodeRef.current.context.state === "closed") {
         if (gainNodeRef.current) {
@@ -166,7 +192,7 @@ export function useSound(soundPath: string, volume: number = 0.3) {
         activeSources.delete(source);
       };
     } catch (error) {
-      console.error("Error playing sound:", error);
+      console.warn("Error playing sound:", error);
     }
   }, [volume, soundPath]);
 
@@ -237,7 +263,7 @@ export const Sounds = {
   // Photo booth sounds
   PHOTO_SHUTTER: "/sounds/PhotoShutter.mp3",
   // Boot sound
-  BOOT: "/sounds/Boot.mp3",
+  BOOT: "/sounds/PS1_Startup.mp3",
 } as const;
 
 // Lazily preload sounds after the first user interaction (click or touch)

@@ -27,3 +27,6 @@ dist-ssr
 .env*.local
 
 **/.claude/settings.local.json
+
+resources/
+ASSET_README.md

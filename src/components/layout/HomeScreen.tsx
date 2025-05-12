@@ -34,24 +34,24 @@ const MEMORY_CARD_SLOTS: MemoryCardSlot[] = [
   },
   {
     id: "slot-3",
-    title1: "G-Police",
-    title2: "War-Zone Years",
-    thumbnailSrc: "/assets/slots/g-police.png",
-    appId: "g-police" as AppId,
+    title1: "Metal Gear",
+    title2: "Ops Archive",
+    thumbnailSrc: "/assets/slots/metal-gear.png",
+    appId: "metal-gear" as AppId,
   },
   {
     id: "slot-4",
-    title1: "Parappa",
-    title2: "Cannabis ERP Rap",
-    thumbnailSrc: "/assets/slots/parappa.png",
-    appId: "parappa" as AppId,
+    title1: "Need for Speed",
+    title2: "Prototype Garage",
+    thumbnailSrc: "/assets/slots/need-for-speed.png",
+    appId: "need-for-speed" as AppId,
   },
   {
     id: "slot-5",
-    title1: "Metal Gear",
-    title2: "ArkiFi Ops",
-    thumbnailSrc: "/assets/slots/metal-gear.png",
-    appId: "metal-gear" as AppId,
+    title1: "Parappa",
+    title2: "Cannabis ERP Rap",
+    thumbnailSrc: "/assets/slots/parappa.png",
+    appId: "need-for-speed" as AppId, // Redirect to Need for Speed until implemented
   },
   {
     id: "slot-6",
@@ -77,10 +77,17 @@ const MEMORY_CARD_SLOTS: MemoryCardSlot[] = [
   },
 ];
 
-export function HomeScreen({ apps, onSelectSlot }: HomeScreenProps) {
+export function HomeScreen({ apps: _apps, onSelectSlot }: HomeScreenProps) {
   const [focusedSlotIndex, setFocusedSlotIndex] = useState(0);
   const [isKonamiActive, setIsKonamiActive] = useState(false);
   const [konamiTimeout, setKonamiTimeout] = useState<number | null>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  // Check for reduced motion preference
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setReducedMotion(prefersReducedMotion);
+  }, []);
   
   // Handles keyboard navigation
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -106,13 +113,21 @@ export function HomeScreen({ apps, onSelectSlot }: HomeScreenProps) {
           onSelectSlot(slot.appId);
         }
         break;
+      case "Backspace":
+      case "Escape":
+      case "c":
+      case "C":
+      case "[": // Square symbol on US keyboard
+        // Back action - could be used for navigation to another screen
+        console.log("Back action triggered");
+        break;
       default:
         break;
     }
   }, [focusedSlotIndex, onSelectSlot]);
   
   // Konami code sequence handling
-  const [konamiSequence, setKonamiSequence] = useState<string[]>([]);
+  const [_konamiSequence, setKonamiSequence] = useState<string[]>([]);
   
   const checkKonamiCode = useCallback((key: string) => {
     const konamiCode = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
@@ -174,11 +189,16 @@ export function HomeScreen({ apps, onSelectSlot }: HomeScreenProps) {
         {/* Slots grid */}
         <div className="grid grid-cols-4 gap-4 max-w-4xl">
           {MEMORY_CARD_SLOTS.map((slot, index) => (
-            <div 
+            <div
               key={slot.id}
-              className={`ps-memory-card w-48 h-48 p-4 flex flex-col items-center cursor-pointer transition ${
-                focusedSlotIndex === index ? 'ps-glow' : ''
+              className={`ps-memory-card w-48 h-60 p-4 flex flex-col items-center cursor-pointer transition ${
+                focusedSlotIndex === index ? 'transform -translate-y-2 scale-105' : ''
               } ${slot.isDisabled ? 'opacity-60 cursor-not-allowed animate-pulse' : ''}`}
+              style={{
+                backgroundImage: 'url(/assets/ui/mcard_plastic.png)',
+                backgroundSize: 'cover',
+                boxShadow: '0 0 4px #000',
+              }}
               onClick={() => {
                 if (!slot.isDisabled) {
                   setFocusedSlotIndex(index);
@@ -186,45 +206,66 @@ export function HomeScreen({ apps, onSelectSlot }: HomeScreenProps) {
                 }
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !slot.isDisabled) {
+                if ((e.key === "Enter" || e.key === "x" || e.key === "X") && !slot.isDisabled) {
                   onSelectSlot(slot.appId);
                 }
               }}
               tabIndex={slot.isDisabled ? -1 : 0}
               role="button"
-              aria-label={`Open Slot ${index + 1} - ${slot.title1}`}
+              aria-label={`Slot ${index + 1} - ${slot.title1} - ${slot.title2}`}
             >
-              <img 
-                src={slot.thumbnailSrc} 
-                alt={slot.title1} 
+              {/* Memory card screws */}
+              <div className="absolute top-2 left-2 w-3 h-3 rounded-full bg-gray-600 border border-gray-700"></div>
+              <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-gray-600 border border-gray-700"></div>
+
+              {/* Thumbnail */}
+              <img
+                src={slot.thumbnailSrc}
+                alt={slot.title1}
                 className="w-24 h-24 mb-2 object-contain"
+                loading="lazy"
               />
-              <h2 className="text-center text-sm font-bold mb-1">{slot.title1}</h2>
+
+              {/* Title */}
+              <h2 className="text-center text-sm font-bold mb-1 text-gray-800">{slot.title1}</h2>
               <p className="text-center text-xs text-gray-700 uppercase">{slot.title2}</p>
+
+              {/* LED blocks */}
+              <div className="mt-4 flex gap-1">
+                <div className="w-3 h-3 bg-gray-600 rounded-sm"></div>
+                <div className="w-3 h-3 bg-gray-600 rounded-sm"></div>
+                <div className="w-3 h-3 bg-gray-600 rounded-sm"></div>
+              </div>
+
+              {/* Focus glow effect */}
+              {focusedSlotIndex === index && (
+                <div className={`absolute inset-0 rounded ${reducedMotion ? 'border-2 border-white' : 'ps-glow'}`} />
+              )}
             </div>
           ))}
         </div>
         
         {/* Navigation help */}
-        <div className="mt-8 flex items-center gap-4 text-ps-plastic">
-          <span className="border border-ps-plastic px-2">▲</span>
-          <span className="border border-ps-plastic px-2">▼</span>
-          <span className="border border-ps-plastic px-2">◀</span>
-          <span className="border border-ps-plastic px-2">▶</span>
-          <span className="ml-4">
-            <span className="border border-ps-plastic px-2 mx-1">X</span> 
-            Select
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-4 text-ps-plastic">
+          <span className="bg-ps-plastic/20 text-ps-plastic rounded px-2 py-1">▲</span>
+          <span className="bg-ps-plastic/20 text-ps-plastic rounded px-2 py-1">▼</span>
+          <span className="bg-ps-plastic/20 text-ps-plastic rounded px-2 py-1">◀</span>
+          <span className="bg-ps-plastic/20 text-ps-plastic rounded px-2 py-1">▶</span>
+          <span className="ml-4 flex items-center">
+            <span className="bg-ps-plastic/20 text-ps-plastic rounded px-2 py-1 mx-1">X</span>
+            <span className="text-white">Select</span>
           </span>
-          <span>
-            <span className="border border-ps-plastic px-2 mx-1">□</span> 
-            Back
+          <span className="flex items-center">
+            <span className="bg-ps-plastic/20 text-ps-plastic rounded px-2 py-1 mx-1">□</span>
+            <span className="text-white">Back</span>
           </span>
         </div>
       </div>
       
       {/* Dreamcast mode styles */}
       {isKonamiActive && (
-        <style jsx global>{`
+        <style>
+          {`
           .dreamcast-mode .ps-memory-card {
             background-color: #0080ff !important;
           }
@@ -242,7 +283,8 @@ export function HomeScreen({ apps, onSelectSlot }: HomeScreenProps) {
               box-shadow: 0 0 5px #0080ff;
             }
           }
-        `}</style>
+          `}
+        </style>
       )}
     </div>
   );

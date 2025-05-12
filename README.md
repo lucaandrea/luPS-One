@@ -4,7 +4,20 @@ luPS-One is a PlayStation-1–inspired web desktop that chronicles Luca Collins'
 
 ## Features
 
-### Desktop Environment
+### Part 2 Features
+- Pixel-perfect PlayStation 1 boot animation using Three.js and GSAP
+- Memory card grid UI with authentic PS1 styling and LED indicators
+- Complete keyboard navigation with ▲▼◀▶, X (select), and □ (back)
+- 6 content slots (Gran Turismo, FIFA, Metal Gear, Need for Speed, Driver, Demo Disc)
+- Konami code Easter egg for Dreamcast skin toggle (↑↑↓↓←→←→ba)
+- Reduced motion and accessibility support
+- 3D car turntable animation in Gran Turismo slot
+- Language skills visualization in FIFA Pitch & Play slot
+- Codec-style Metal Gear interface for personal history
+- Demo Disc gallery of external project links
+- Animated tachometer in Driver slot that reacts to GitHub stars
+
+### Original Desktop Environment
 
 - Authentic macOS-style desktop interactions
 - Multi-apps window manager
@@ -146,6 +159,22 @@ The project uses:
 ## License
 
 This project is licensed under the AGPL-3.0 License - see the [LICENSE](LICENSE) file for details.
+
+### Asset Disclaimer
+
+PlayStation, PlayStation logo, and other related trademarks are the property of Sony Interactive Entertainment Inc. This project is a non-commercial, fan-made tribute and is not affiliated with, sponsored by, or endorsed by Sony Interactive Entertainment.
+
+All car brand names (BMW, Audi, etc.) are mentioned for descriptive purposes only and are trademarks of their respective owners.
+
+## Accessibility
+
+This project includes features to improve accessibility:
+- Reduced motion mode automatically detected via `prefers-reduced-motion` media query
+- Skip animation link for screen readers
+- Full keyboard navigation
+- ARIA labels on interactive elements
+- Focus indicators for navigation
+- High contrast text and UI elements
 
 ## Contributing
 

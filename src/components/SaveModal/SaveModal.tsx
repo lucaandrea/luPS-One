@@ -35,11 +35,16 @@ export function SaveModal({ title1, title2, isOpen, onClose, appId, children }: 
   // Handle escape key to close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" || e.key === "□") {
+      if (e.key === "Escape" ||
+          e.key === "□" ||
+          e.key === "Backspace" ||
+          e.key === "c" ||
+          e.key === "C" ||
+          e.key === "[") { // Square symbol on US keyboard
         handleClose();
       }
     };
-    
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
@@ -51,7 +56,9 @@ export function SaveModal({ title1, title2, isOpen, onClose, appId, children }: 
   
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className={`
+      <DialogContent
+        aria-describedby="modal-description"
+        className={`
         p-0 rounded-lg border-2 border-ps-plastic
         bg-ps-crt-glass max-w-4xl w-[95%] h-[80vh]
         overflow-hidden shadow-2xl
@@ -75,7 +82,7 @@ export function SaveModal({ title1, title2, isOpen, onClose, appId, children }: 
           </div>
           
           {/* Modal Content */}
-          <div className="flex-1 bg-gradient-to-b from-gray-800 to-black p-6 overflow-auto text-white">
+          <div id="modal-description" className="flex-1 bg-gradient-to-b from-gray-800 to-black p-6 overflow-auto text-white">
             {children}
           </div>
           

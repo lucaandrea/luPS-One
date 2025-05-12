@@ -1,11 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Toaster } from "./components/ui/sonner";
-import { BootScreen } from "./components/dialogs/BootScreen";
 import { HomeScreen } from "./components/layout/HomeScreen";
 import { GranTurismoSlot } from "./slots/gran-turismo";
 import { FifaSlot } from "./slots/fifa";
-import { GPolicySlot } from "./slots/g-police";
+import { MetalGearSlot } from "./slots/metal-gear";
+import { NeedForSpeedSlot } from "./slots/need-for-speed";
+import { DriverSlot } from "./slots/driver";
+import { DemoDiscSlot } from "./slots/demo-disc";
 import { AppId } from "./config/appIds";
+
+// Dynamically import the PS1 Boot Screen to reduce initial bundle size
+const PS1BootScreen = lazy(() => import("./components/ps1-boot/PS1BootScreen"));
 
 // CRT overlay component
 function CRTOverlay({ disabled = false }) {
@@ -32,9 +37,11 @@ function App() {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     setReducedMotion(prefersReducedMotion);
 
-    // Only show boot screen on first visit and if not preferring reduced motion
-    if (!hasSeenBoot && !prefersReducedMotion) {
+    // Always show boot screen on first visit (respect reduced motion setting)
+    if (!hasSeenBoot) {
       setShowBootScreen(true);
+      // Set the flag to prevent showing on subsequent loads
+      localStorage.setItem('lupsOneBootSeen', 'true');
     }
   }, []);
 
@@ -78,28 +85,31 @@ function App() {
         return <GranTurismoSlot isOpen={true} onClose={() => setActiveSlot(null)} />;
       case 'fifa':
         return <FifaSlot isOpen={true} onClose={() => setActiveSlot(null)} />;
-      case 'g-police':
-        return <GPolicySlot isOpen={true} onClose={() => setActiveSlot(null)} />;
-      // Add other slots as they're implemented
+      case 'metal-gear':
+        return <MetalGearSlot isOpen={true} onClose={() => setActiveSlot(null)} />;
+      case 'need-for-speed':
+        return <NeedForSpeedSlot isOpen={true} onClose={() => setActiveSlot(null)} openDemoDisc={() => setActiveSlot('demo-disc')} />;
+      case 'driver':
+        return <DriverSlot isOpen={true} onClose={() => setActiveSlot(null)} />;
+      case 'demo-disc':
+        return <DemoDiscSlot isOpen={true} onClose={() => setActiveSlot(null)} />;
       default:
         return null;
     }
   };
 
-  if (showBootScreen) {
-    return (
-      <BootScreen
-        isOpen={true}
-        onOpenChange={() => {}}
-        onBootComplete={() => {
-          setShowBootScreen(false);
-        }}
-      />
-    );
-  }
-
   return (
     <>
+      {showBootScreen && (
+        <Suspense fallback={<div className="fixed inset-0 bg-black z-50" />}>
+          <PS1BootScreen
+            isOpen={true}
+            onClose={() => setShowBootScreen(false)}
+            reducedMotion={reducedMotion}
+          />
+        </Suspense>
+      )}
+
       <CRTOverlay disabled={reducedMotion} />
       <HomeScreen apps={[]} onSelectSlot={handleSelectSlot} />
       {renderSlotContent()}

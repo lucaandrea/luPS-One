@@ -38,6 +38,7 @@ const DialogContent = React.forwardRef<
         onEscapeKeyDown={cleanupPointerEvents}
         onPointerDownOutside={cleanupPointerEvents}
         onCloseAutoFocus={cleanupPointerEvents}
+        aria-describedby="dialog-description"
         {...props}
       >
         {children}
