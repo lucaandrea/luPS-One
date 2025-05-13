@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { BaseApp } from "@/apps/base/types";
 import { AppId } from "@/config/appIds";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface HomeScreenProps {
   apps: BaseApp[];
@@ -62,10 +63,10 @@ const MEMORY_CARD_SLOTS: MemoryCardSlot[] = [
   },
   {
     id: "slot-7",
-    title1: "Demo Disc",
-    title2: "Prototype Gallery",
-    thumbnailSrc: "/assets/slots/demo-disc.png",
-    appId: "demo-disc" as AppId,
+    title1: "PS Chat Disc",
+    title2: "Ask Luca AI",
+    thumbnailSrc: "/assets/slots/chat-disc.png",
+    appId: "chat-disc" as AppId,
   },
   {
     id: "slot-8",
@@ -285,6 +286,79 @@ export function HomeScreen({ apps: _apps, onSelectSlot }: HomeScreenProps) {
           }
           `}
         </style>
+      )}
+    </div>
+  );
+}
+
+function MemoryCardSlot({ 
+  slot, 
+  isActive, 
+  isFocused,
+  onClick 
+}: { 
+  slot: MemoryCardSlot, 
+  isActive: boolean, 
+  isFocused: boolean,
+  onClick: () => void 
+}) {
+  const prefersReducedMotion = useReducedMotion();
+  
+  return (
+    <div
+      className={`
+        relative flex flex-col items-center justify-center 
+        w-32 h-40 rounded-lg p-2 transition-all
+        ${isActive ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'}
+        ${isFocused ? 'scale-105 -translate-y-0.5' : ''}
+      `}
+      tabIndex={isActive ? 0 : -1}
+      onClick={isActive ? onClick : undefined}
+      onKeyDown={(e) => {
+        if (isActive && (e.key === 'Enter' || e.key === 'x' || e.key === 'X')) {
+          onClick();
+        }
+      }}
+      aria-label={`Slot ${slot.id.split('-')[1]} – ${slot.title1} – ${slot.title2}`}
+      style={{
+        backgroundImage: "url('/assets/ui/mcard_plastic.png')",
+        backgroundColor: "#bdbdbd",
+        backgroundSize: "cover",
+        boxShadow: "0 0 4px #000"
+      }}
+    >
+      {/* Two embossed screws at the top */}
+      <div className="absolute top-1 left-1 w-3 h-3 rounded-full bg-[#a0a0a0] border border-[#909090] shadow-inner"></div>
+      <div className="absolute top-1 right-1 w-3 h-3 rounded-full bg-[#a0a0a0] border border-[#909090] shadow-inner"></div>
+      
+      {/* Thumbnail */}
+      <div className="w-24 h-24 mb-1 bg-black/30 overflow-hidden rounded">
+        <img
+          src={slot.thumbnailSrc}
+          alt={`${slot.title1} ${slot.title2}`}
+          className="w-full h-full object-contain"
+          loading="lazy"
+        />
+      </div>
+      
+      {/* LED indicator grid */}
+      <div className="w-full px-2 flex space-x-1 mb-1">
+        <div className="w-4 h-2 bg-[#8d8d8d] rounded-sm"></div>
+        <div className="w-4 h-2 bg-[#8d8d8d] rounded-sm"></div>
+        <div className="w-4 h-2 bg-[#8d8d8d] rounded-sm"></div>
+      </div>
+      
+      {/* Title */}
+      <div className="text-center">
+        <p className="text-black text-xs font-bold leading-tight">{slot.title1}</p>
+        <p className="text-black text-[10px] leading-tight">{slot.title2}</p>
+      </div>
+      
+      {/* Focus effect */}
+      {isFocused && (
+        <div 
+          className={`absolute inset-0 rounded-lg pointer-events-none ${prefersReducedMotion ? 'border-2 border-white' : 'ps-glow'}`}
+        ></div>
       )}
     </div>
   );

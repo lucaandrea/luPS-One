@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { SaveModal } from '@/components/SaveModal/SaveModal';
+import gsap from 'gsap';
 
 interface DriverSlotProps {
   isOpen: boolean;
@@ -17,36 +18,109 @@ const slotData = {
 // Export it separately for better compatibility with Fast Refresh
 export const DriverSlotData = slotData;
 
+// GitHub API
+const GITHUB_REPO_URL = 'https://api.github.com/repos/lucaandreacollins/zipply-alpha';
+const CACHE_KEY = 'zipply-alpha-stars';
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutes in milliseconds
+
 export function DriverSlot({ isOpen, onClose }: DriverSlotProps) {
   const [rpm, setRpm] = useState(0);
+  const [targetRpm, setTargetRpm] = useState(0);
   const [starCount, setStarCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isHighRpm, setIsHighRpm] = useState(false);
   
-  // Simulate fetching GitHub star count
+  const rpmRef = useRef({ value: 0 });
+  
+  // Fetch GitHub star count when the component opens
   useEffect(() => {
     if (isOpen) {
-      // In a real app, this would be a fetch to GitHub API
-      // For demo, we'll simulate with random number between 50-200
-      const fakeStarCount = Math.floor(Math.random() * 150) + 50;
-      
-      // Map star count to RPM range (0-9000)
-      const mappedRpm = Math.floor((fakeStarCount / 200) * 9000);
-      
-      // Animate RPM gauge
-      let currentRpm = 0;
-      const interval = setInterval(() => {
-        currentRpm += Math.floor(Math.random() * 400) + 200;
-        if (currentRpm >= mappedRpm) {
-          currentRpm = mappedRpm;
-          clearInterval(interval);
-        }
-        setRpm(currentRpm);
-      }, 100);
-      
-      setStarCount(fakeStarCount);
-      
-      return () => clearInterval(interval);
+      setIsLoading(true);
+      fetchStarCount();
     }
   }, [isOpen]);
+  
+  // Check if we're in high RPM mode (> 7200 RPM)
+  useEffect(() => {
+    setIsHighRpm(rpm > 7200);
+  }, [rpm]);
+  
+  // Fetch star count from GitHub API or cache
+  const fetchStarCount = async () => {
+    try {
+      // Check if we have cached data
+      const cachedData = localStorage.getItem(CACHE_KEY);
+      
+      if (cachedData) {
+        const { stars, timestamp } = JSON.parse(cachedData);
+        const isExpired = Date.now() - timestamp > CACHE_TTL;
+        
+        if (!isExpired) {
+          // Use cached data if not expired
+          setStarCount(stars);
+          animateToRpm(mapStarsToRpm(stars));
+          setIsLoading(false);
+          return;
+        }
+      }
+      
+      // If no cache or expired, fetch from GitHub API
+      const response = await fetch(GITHUB_REPO_URL);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch GitHub data: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const stars = data.stargazers_count || Math.floor(Math.random() * 200) + 50; // Fallback to random if API fails
+      
+      // Save to cache
+      localStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify({
+          stars,
+          timestamp: Date.now(),
+        })
+      );
+      
+      // Update state
+      setStarCount(stars);
+      animateToRpm(mapStarsToRpm(stars));
+    } catch (error) {
+      console.error('Error fetching GitHub stars:', error);
+      
+      // Fallback to random number
+      const randomStars = Math.floor(Math.random() * 200) + 50;
+      setStarCount(randomStars);
+      animateToRpm(mapStarsToRpm(randomStars));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Map star count to RPM range (0-9000)
+  const mapStarsToRpm = (stars: number) => {
+    return Math.floor((stars / 200) * 9000);
+  };
+  
+  // Animate the RPM gauge using GSAP
+  const animateToRpm = (targetValue: number) => {
+    // Set target RPM for reference
+    setTargetRpm(targetValue);
+    
+    // Display target RPM in console for debugging purposes
+    console.log(`Animating tachometer to ${targetValue} RPM (${Math.round((targetValue / 9000) * 100)}%)`);
+    
+    // Use GSAP to animate the RPM value
+    gsap.to(rpmRef.current, {
+      value: targetValue,
+      duration: 1.2,
+      ease: "power3.out",
+      onUpdate: () => {
+        setRpm(Math.floor(rpmRef.current.value));
+      }
+    });
+  };
   
   return (
     <SaveModal
@@ -57,7 +131,7 @@ export function DriverSlot({ isOpen, onClose }: DriverSlotProps) {
       appId={DriverSlotData.appId as any}
     >
       <div className="flex flex-col md:flex-row gap-8">
-        {/* Tachometer */}
+        {/* Tachometer showing alpha RPM linked to GitHub stars */}
         <div className="flex-1 flex flex-col items-center justify-center">
           <h2 className="text-ps-plastic text-xl mb-4">Alpha Drive Status</h2>
           
@@ -65,15 +139,14 @@ export function DriverSlot({ isOpen, onClose }: DriverSlotProps) {
             {/* Tachometer background */}
             <div className="absolute inset-0 rounded-full border-4 border-gray-700 bg-black"></div>
             
-            {/* RPM markers */}
-            <div className="absolute inset-0 flex items-center justify-center">
+            {/* RPM markers - 270° sweep (-135° to +135°) */}
+            <div className="absolute inset-0">
               {[...Array(10)].map((_, i) => (
                 <div 
                   key={i} 
-                  className="absolute h-4 w-1 bg-white"
+                  className="absolute left-1/2 top-1/2 h-4 w-1 bg-white origin-bottom"
                   style={{ 
-                    transform: `rotate(${-120 + i * 24}deg) translateY(-110px)`,
-                    transformOrigin: 'center bottom'
+                    transform: `rotate(${-135 + i * 30}deg) translateY(-110px)`,
                   }}
                 />
               ))}
@@ -82,10 +155,9 @@ export function DriverSlot({ isOpen, onClose }: DriverSlotProps) {
               {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                 <div 
                   key={num} 
-                  className="absolute text-white text-xs font-bold"
+                  className="absolute left-1/2 top-1/2 text-white text-xs font-bold"
                   style={{ 
-                    transform: `rotate(${-120 + num * 24}deg) translateY(-95px) rotate(${120 - num * 24}deg)`,
-                    transformOrigin: 'center bottom'
+                    transform: `rotate(${-135 + num * 30}deg) translateY(-92px) rotate(${135 - num * 30}deg)`,
                   }}
                 >
                   {num}
@@ -93,14 +165,24 @@ export function DriverSlot({ isOpen, onClose }: DriverSlotProps) {
               ))}
             </div>
             
-            {/* RPM needle */}
-            <div
-              className="absolute bottom-[32px] left-1/2 w-1 h-[120px] bg-ps-red transition-transform duration-100 origin-bottom"
+            {/* RPM needle container for proper centering */}
+            <div 
+              className="absolute left-1/2 top-1/2 w-0 h-0"
               style={{
-                transform: `translateX(-50%) rotate(${-120 + (rpm / 9000) * 240}deg)`
+                transform: `rotate(${-135 + (rpm / 9000) * 270}deg)`,
+                transformOrigin: 'center',
+                transition: 'transform 100ms ease-out'
               }}
             >
-              <div className="absolute -left-1 -top-1 w-3 h-3 rounded-full bg-ps-red"></div>
+              {/* Needle with proper transform origin */}
+              <div
+                className="absolute bg-ps-red w-1 h-[120px] origin-bottom"
+                style={{
+                  transform: 'translateX(-50%) translateY(-100%)'
+                }}
+              >
+                <div className={`absolute -left-1 -top-1 w-3 h-3 rounded-full bg-ps-red ${isHighRpm ? 'animate-pulse shadow-md shadow-ps-red' : ''}`}></div>
+              </div>
             </div>
             
             {/* Center cap */}
@@ -113,7 +195,14 @@ export function DriverSlot({ isOpen, onClose }: DriverSlotProps) {
             {/* Current RPM display */}
             <div className="absolute top-3/4 left-0 right-0 text-center">
               <div className="inline-block bg-black/50 px-2 py-1 rounded">
-                <span className="text-ps-green font-mono text-sm">{rpm.toLocaleString()}</span>
+                <span className={`font-mono text-sm ${isHighRpm ? 'text-ps-red animate-pulse' : 'text-ps-green'}`}>
+                  {isLoading ? "Loading..." : rpm.toLocaleString()}
+                </span>
+                {!isLoading && targetRpm > rpm && (
+                  <span className="text-ps-amber font-mono text-xs ml-2">
+                    → {targetRpm.toLocaleString()}
+                  </span>
+                )}
               </div>
             </div>
             
@@ -126,13 +215,13 @@ export function DriverSlot({ isOpen, onClose }: DriverSlotProps) {
           </div>
         </div>
         
-        {/* Roadmap */}
+        {/* Roadmap with the items specified in the guide */}
         <div className="flex-1 bg-ps-crt-glass p-4 rounded-lg">
           <h3 className="text-ps-plastic text-lg mb-4">Project Roadmap</h3>
           
           <div className="space-y-4">
             <div className="border-l-2 border-ps-amber pl-4">
-              <h4 className="text-ps-amber font-bold mb-1">Q3-2025 Beta Launch</h4>
+              <h4 className="text-ps-amber font-bold mb-1">Q3-2025 Beta</h4>
               <p className="text-sm text-gray-300">
                 Public beta access with expanded diagnostics capabilities and 
                 expanded vehicle compatibility (VAG, BMW, Toyota).

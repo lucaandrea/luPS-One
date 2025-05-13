@@ -1,4 +1,5 @@
 import React from "react";
+import { AppId } from '@/config/appIds';
 
 export interface AppProps {
   onClose: () => void;
@@ -15,21 +16,7 @@ export interface AppProps {
 }
 
 export interface BaseApp {
-  id:
-    | "soundboard"
-    | "internet-explorer"
-    | "chats"
-    | "textedit"
-    | "control-panels"
-    | "minesweeper"
-    | "finder"
-    | "paint"
-    | "videos"
-    | "pc"
-    | "photo-booth"
-    | "synth"
-    | "ipod"
-    | "terminal";
+  id: AppId;
   name: string;
   icon: string | { type: "image"; src: string };
   description: string;

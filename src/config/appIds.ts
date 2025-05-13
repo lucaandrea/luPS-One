@@ -23,6 +23,7 @@ export const appIds = [
   "parappa",
   "driver",
   "demo-disc",
+  "chat-disc",
   "empty"
 ] as const;
 

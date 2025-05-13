@@ -19,14 +19,13 @@ const slotData = {
 export const FifaSlotData = slotData;
 
 export function FifaSlot({ isOpen, onClose }: FifaSlotProps) {
-  const { play: playChant } = useSound("/sounds/stadium-chant.ogg", 0.4);
+  // Use the correct sound file path as specified in the guide
+  const { play: playChant } = useSound("/sounds/stadium-chant.ogg", 0.8);
   
   useEffect(() => {
-    // Play stadium chant sound effect when modal opens
-    if (isOpen) {
-      playChant();
-    }
-  }, [isOpen, playChant]);
+    // Preload the sound when modal opens but don't auto-play
+    // Let the user press the button to play the sound
+  }, [isOpen]);
   
   return (
     <SaveModal
@@ -37,7 +36,7 @@ export function FifaSlot({ isOpen, onClose }: FifaSlotProps) {
       appId={FifaSlotData.appId as any}
     >
       <div className="flex flex-col md:flex-row gap-8">
-        {/* Bio Section */}
+        {/* Bio Section - Updated per guide */}
         <div className="flex-1">
           <h2 className="text-ps-plastic text-xl mb-4">Player Bio</h2>
           
@@ -51,11 +50,11 @@ export function FifaSlot({ isOpen, onClose }: FifaSlotProps) {
           
           <div className="mt-6 text-sm text-ps-amber">
             <p>
-              Press the Crowd Chant button to hear the stadium atmosphere.
+              Press the button below to hear the stadium atmosphere.
             </p>
             <button
               onClick={playChant}
-              className="mt-2 bg-ps-amber text-black px-4 py-2 rounded"
+              className="mt-2 bg-ps-amber text-black px-4 py-2 rounded flex items-center"
               aria-label="Play crowd chant sound effect"
             >
               🔊 Crowd Chant
@@ -63,7 +62,7 @@ export function FifaSlot({ isOpen, onClose }: FifaSlotProps) {
           </div>
         </div>
         
-        {/* Language Skills Chart */}
+        {/* Language Skills Chart - Using the percentages from guide */}
         <div className="flex-1 bg-ps-crt-glass p-4 rounded-lg">
           <h3 className="text-ps-plastic text-lg mb-4">Language Skills</h3>
           

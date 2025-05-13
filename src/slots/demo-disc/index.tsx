@@ -15,63 +15,46 @@ const slotData = {
   appId: "demo-disc",
 };
 
-// Export it separately for better compatibility with Fast Refresh
-export const DemoDiscSlotData = slotData;
-
-// Demo project data
-const DEMO_PROJECTS = [
+// Define the prototypes to show in the gallery
+const prototypes = [
   {
-    id: 'crewai-tester',
-    title: 'CrewAI Prompt Tester',
-    description: 'Experiment with multi-agent prompts in a visual playground.',
-    thumbnail: '/assets/slots/demos/crewai-tester.gif',
-    url: 'https://github.com/example/crewai-tester', // Replace with actual URL
-    tags: ['AI', 'Multi-agent', 'Python'],
-    color: 'bg-ps-cyan'
+    title: "CrewAI Tester",
+    description: "Multi-agent prompt experimentation platform for orchestrating AI agent workflows.",
+    thumbnailSrc: "/assets/slots/demos/crewai.gif",
+    url: "https://github.com/lucaandreacollins/CrewAI-Tester",
+    color: "ps-red"
   },
   {
-    id: 'notesgpt',
-    title: 'NotesGPT',
-    description: 'Voice-powered note-taking with AI summaries and organization.',
-    thumbnail: '/assets/slots/demos/notesgpt.gif',
-    url: 'https://github.com/example/notesgpt', // Replace with actual URL
-    tags: ['Voice', 'AI', 'Notes'],
-    color: 'bg-ps-amber'
+    title: "NotesGPT",
+    description: "Voice-powered note-taking with real-time transcription and AI summarization.",
+    thumbnailSrc: "/assets/slots/demos/notesgpt.gif",
+    url: "https://github.com/lucaandreacollins/NotesGPT",
+    color: "ps-amber"
   },
   {
-    id: 'prompt-bible',
-    title: 'Prompt Bible',
-    description: '100+ markdown prompt patterns organized by use case.',
-    thumbnail: '/assets/slots/demos/prompt-bible.gif',
-    url: 'https://github.com/example/prompt-bible', // Replace with actual URL
-    tags: ['Prompts', 'Markdown', 'Collection'],
-    color: 'bg-ps-red'
-  },
-  {
-    id: 'zipply-dash',
-    title: 'Zipply Dashboard',
-    description: 'OBD data visualization for vehicle performance metrics.',
-    thumbnail: '/assets/slots/demos/zipply-dash.gif',
-    url: 'https://github.com/example/zipply-dash', // Replace with actual URL
-    tags: ['OBD', 'Dashboard', 'React'],
-    color: 'bg-ps-green'
+    title: "Prompt Bible",
+    description: "100+ markdown prompt patterns organized by use case with version control.",
+    thumbnailSrc: "/assets/slots/demos/prompt-bible.gif",
+    url: "https://github.com/lucaandreacollins/PromptBible",
+    color: "ps-cyan"
   }
 ];
 
+// Export it separately for better compatibility with Fast Refresh
+export const DemoDiscSlotData = slotData;
+
 export function DemoDiscSlot({ isOpen, onClose }: DemoDiscSlotProps) {
-  // Play a short click sound for demo disc
-  const { play: playStartup } = useSound(Sounds.BUTTON_CLICK_UP, 0.3);
+  // Use a valid sound from the Sounds constant
+  const { play: playUISound } = useSound(Sounds.BUTTON_CLICK, 0.3);
   
+  // Play UI sound when opened
   useEffect(() => {
     if (isOpen) {
-      // Play sound with slight delay
-      setTimeout(() => {
-        playStartup();
-      }, 200);
+      playUISound();
     }
-  }, [isOpen, playStartup]);
+  }, [isOpen, playUISound]);
   
-  const handleOpenProject = (url: string) => {
+  const handleOpenExternal = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
   
@@ -83,62 +66,45 @@ export function DemoDiscSlot({ isOpen, onClose }: DemoDiscSlotProps) {
       onClose={onClose}
       appId={DemoDiscSlotData.appId as any}
     >
-      <div className="flex flex-col gap-6">
-        {/* Header */}
-        <div className="text-center mb-2">
-          <div className="inline-block bg-gray-800 px-4 py-2 rounded-t-lg">
-            <h2 className="text-white font-bold text-xl">PROTOTYPE GALLERY</h2>
-          </div>
-          <div className="w-full h-1 bg-gradient-to-r from-ps-red via-ps-amber to-ps-green"></div>
-        </div>
+      <div className="flex flex-col">
+        <h2 className="text-ps-plastic text-xl mb-6 font-bold">Luca's Prototype Gallery</h2>
         
-        {/* Project grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {DEMO_PROJECTS.map((project) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {prototypes.map((proto, index) => (
             <div 
-              key={project.id}
-              className="bg-gray-900/70 rounded-lg overflow-hidden shadow-md hover:shadow-lg transform transition-transform hover:scale-[1.02] cursor-pointer"
-              onClick={() => handleOpenProject(project.url)}
+              key={index}
+              className="bg-black/40 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-transform hover:scale-105 cursor-pointer"
+              onClick={() => handleOpenExternal(proto.url)}
             >
-              <div className="relative h-40 overflow-hidden">
+              <div className="aspect-video overflow-hidden">
                 <img 
-                  src={project.thumbnail} 
-                  alt={project.title}
+                  src={proto.thumbnailSrc} 
+                  alt={proto.title}
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent opacity-70"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-3">
-                  <h3 className="text-white font-bold text-lg">{project.title}</h3>
-                </div>
               </div>
               
               <div className="p-4">
-                <p className="text-gray-300 mb-3 text-sm">{project.description}</p>
+                <h3 className={`text-${proto.color} font-bold mb-2`}>{proto.title}</h3>
+                <p className="text-gray-300 text-sm">{proto.description}</p>
                 
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {project.tags.map((tag, i) => (
-                    <span 
-                      key={i} 
-                      className={`${project.color} text-white text-xs px-2 py-1 rounded-sm`}
-                    >
-                      {tag}
-                    </span>
-                  ))}
+                <div className="mt-4 flex justify-end">
+                  <span className="text-xs bg-gray-800 py-1 px-2 rounded text-gray-400 flex items-center">
+                    <span className="mr-1">︎↗</span> Open
+                  </span>
                 </div>
-              </div>
-              
-              <div className="px-4 py-2 border-t border-gray-700 flex justify-between items-center">
-                <span className="text-gray-400 text-xs">Opens in new tab</span>
-                <span className="text-ps-cyan text-xs">→ Visit Project</span>
               </div>
             </div>
           ))}
         </div>
         
-        {/* Footer note */}
-        <div className="mt-4 text-center text-gray-400 text-sm italic">
-          Projects load actual external URLs. Each prototype opens in a new browser tab.
+        <div className="mt-8 p-4 bg-ps-plastic/10 rounded text-center">
+          <p className="text-white">
+            These prototypes represent experimental projects that may not be maintained.
+            <br />
+            Each opens in a new tab to the external repository.
+          </p>
         </div>
       </div>
     </SaveModal>

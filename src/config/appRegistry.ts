@@ -12,6 +12,7 @@ import { PhotoBoothApp } from "@/apps/photo-booth";
 import { SynthApp } from "@/apps/synth";
 import { IpodApp } from "@/apps/ipod";
 import { TerminalApp } from "@/apps/terminal";
+import { ChatDiscApp } from "@/apps/chat-disc";
 import { appIds } from './appIds';
 
 export type AppId = (typeof appIds)[number];
@@ -137,6 +138,13 @@ export const appRegistry = {
       defaultSize: { width: 365, height: 400 },
       minSize: { width: 320, height: 400 },
       maxSize: { width: 365, height: 600 },
+    } as WindowConstraints,
+  },
+  [ChatDiscApp.id]: {
+    ...ChatDiscApp,
+    windowConfig: {
+      defaultSize: { width: 500, height: 600 },
+      minSize: { width: 400, height: 400 },
     } as WindowConstraints,
   },
 } as const;

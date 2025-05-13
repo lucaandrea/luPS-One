@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import gsap from 'gsap';
@@ -37,7 +37,7 @@ function PS1BootAnimation({ onAudioTrigger }: PS1BootAnimationProps) {
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setClearColor(0x000000);
+    renderer.setClearColor(0x000000, 1); // Add opacity parameter (1)
     rendererRef.current = renderer;
     
     // Add lighting
@@ -47,38 +47,137 @@ function PS1BootAnimation({ onAudioTrigger }: PS1BootAnimationProps) {
     // Create logo placeholders
     let sceLogoMesh: THREE.Mesh | null = null;
     let psLogoMesh: THREE.Mesh | THREE.Group | null = null;
-    
+
+    // Initialize loading flags
+    let sceLogoLoaded = false;
+    let psLogoLoaded = false;
+
     // Texture loader for SCE logo
     const textureLoader = new THREE.TextureLoader();
-    
-    // Create a simple plane for SCE logo
-    const scePlaneGeometry = new THREE.PlaneGeometry(2.5, 2.5);
-    const scePlaneMaterial = new THREE.MeshBasicMaterial({
-      color: 0xff0000, // Red color for SCE
-      transparent: true,
-      opacity: 0,
-      side: THREE.DoubleSide
-    });
-    sceLogoMesh = new THREE.Mesh(scePlaneGeometry, scePlaneMaterial);
-    sceLogoMesh.visible = false;
-    scene.add(sceLogoMesh);
 
-    // PS logo as a simple colored plane until GLB is loaded
-    const psPlaneGeometry = new THREE.PlaneGeometry(2, 2);
-    const psPlaneMaterial = new THREE.MeshBasicMaterial({
-      color: 0x0000ff, // Blue color for PS
-      transparent: true,
-      opacity: 0,
-      side: THREE.DoubleSide
-    });
-    psLogoMesh = new THREE.Mesh(psPlaneGeometry, psPlaneMaterial);
-    psLogoMesh.visible = false;
-    scene.add(psLogoMesh);
+    // Load SCE logo texture
+    textureLoader.load(
+      '/boot/sce_logo.png', // Updated path per guide
+      (texture) => {
+        const geometry = new THREE.PlaneGeometry(2.5, 2.5);
+        const material = new THREE.MeshBasicMaterial({
+          map: texture,
+          transparent: true,
+          opacity: 0,
+          side: THREE.DoubleSide
+        });
+        sceLogoMesh = new THREE.Mesh(geometry, material);
+        sceLogoMesh.visible = false;
+        sceLogoMesh.scale.set(0.5, 0.5, 0.5); // Start at 50% scale for animation
+        scene.add(sceLogoMesh);
 
-    // Both meshes are now ready
-    startBootSequence();
+        sceLogoLoaded = true;
+        if (psLogoLoaded) {
+          startBootSequence();
+        }
+      },
+      undefined,
+      (error) => {
+        console.warn('Error loading SCE logo texture:', error);
+        // Fallback to colored plane
+        const geometry = new THREE.PlaneGeometry(2.5, 2.5);
+        const material = new THREE.MeshBasicMaterial({
+          color: 0xff0000, // Red color for SCE fallback
+          transparent: true,
+          opacity: 0,
+          side: THREE.DoubleSide
+        });
+        sceLogoMesh = new THREE.Mesh(geometry, material);
+        sceLogoMesh.visible = false;
+        sceLogoMesh.scale.set(0.5, 0.5, 0.5); // Start at 50% scale for animation
+        scene.add(sceLogoMesh);
+
+        sceLogoLoaded = true;
+        if (psLogoLoaded) {
+          startBootSequence();
+        }
+      }
+    );
+
+    // Load PlayStation 3D model (GLB)
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.load(
+      '/boot/ps_logo.glb', // Updated path per guide
+      (gltf) => {
+        const model = gltf.scene;
+        model.scale.set(1.5, 1.5, 1.5); // Adjust scale as needed
+
+        // Apply properties to all child meshes
+        model.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            if (child.material) {
+              child.material.transparent = true;
+              child.material.opacity = 0;
+              child.material.side = THREE.DoubleSide;
+            }
+          }
+        });
+
+        model.visible = false;
+        scene.add(model);
+        psLogoMesh = model;
+
+        psLogoLoaded = true;
+        if (sceLogoLoaded) {
+          startBootSequence();
+        }
+      },
+      undefined,
+      (error) => {
+        console.warn('Error loading PS logo GLB:', error);
+
+        // Fallback to using a plane with texture
+        textureLoader.load(
+          '/boot/ps_logo.png', // Updated path per guide
+          (texture) => {
+            const aspectRatio = texture.image ? texture.image.width / texture.image.height : 1;
+            const geometry = new THREE.PlaneGeometry(2 * aspectRatio, 2);
+            const material = new THREE.MeshBasicMaterial({
+              map: texture,
+              transparent: true,
+              opacity: 0,
+              side: THREE.DoubleSide
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.visible = false;
+            scene.add(mesh);
+            psLogoMesh = mesh;
+
+            psLogoLoaded = true;
+            if (sceLogoLoaded) {
+              startBootSequence();
+            }
+          },
+          undefined,
+          (texError) => {
+            console.warn('Error loading PS logo texture:', texError);
+            // Final fallback to colored plane
+            const geometry = new THREE.PlaneGeometry(2, 2);
+            const material = new THREE.MeshBasicMaterial({
+              color: 0x0000ff, // Blue color for PS fallback
+              transparent: true,
+              opacity: 0,
+              side: THREE.DoubleSide
+            });
+            psLogoMesh = new THREE.Mesh(geometry, material);
+            psLogoMesh.visible = false;
+            scene.add(psLogoMesh);
+
+            psLogoLoaded = true;
+            if (sceLogoLoaded) {
+              startBootSequence();
+            }
+          }
+        );
+      }
+    );
     
-    // Animation timeline
+    // Animation timeline with exact PS1 NTSC timings
     function startBootSequence() {
       if (!sceLogoMesh || !psLogoMesh || !sceTextContainerRef.current || !psTextContainerRef.current) return;
       
@@ -87,35 +186,51 @@ function PS1BootAnimation({ onAudioTrigger }: PS1BootAnimationProps) {
       // --- Screen 1: SCE ---
       timeline
         // 0ms→500ms: fade from black → #808080 (12% grey)
-        .to(renderer.getClearColor(), { 
-          r: 0.5, g: 0.5, b: 0.5, 
+        .to(renderer.getClearColor(new THREE.Color()), { // Add temp color object
+          r: 0.5, g: 0.5, b: 0.5, // #808080 exactly as specified
           duration: 0.5, 
           ease: "power1.inOut",
           onUpdate: () => {
             if (rendererRef.current) {
-              rendererRef.current.setClearColor(renderer.getClearColor());
+              const color = renderer.getClearColor(new THREE.Color()); // Add temp color object
+              rendererRef.current.setClearColor(color, 1); // Add opacity parameter (1)
             }
           }
         })
         
-        // 500ms: SCE diamond scale-in
+        // 500ms: SCE diamond scale-in, full opacity by 1000ms
         .call(() => {
           if (sceLogoMesh) {
             sceLogoMesh.visible = true;
-            sceTextContainerRef.current!.style.opacity = '1';
           }
-        }, null, "0.5")
+        }, [], "0.5")
         
-        // SCE logo fade-in
-        .to(sceLogoMesh.material, { opacity: 1, duration: 0.5, ease: "power1.out" }, "<")
+        // SCE logo fade-in and scale from 0.5 to 1.0 over 500ms
+        .to(sceLogoMesh.scale, { 
+          x: 1.0, y: 1.0, z: 1.0, 
+          duration: 0.5, 
+          ease: "power1.out" 
+        }, "0.5")
+        .to(sceLogoMesh.material, { 
+          opacity: 1, 
+          duration: 0.5, 
+          ease: "power1.out" 
+        }, "0.5")
         
         // 600ms: SCE text group fade-in
-        .to(".sce-text", { opacity: 1, duration: 0.5, stagger: 0.1 }, "0.6")
+        .call(() => {
+          sceTextContainerRef.current!.style.opacity = '1';
+        }, [], "0.6")
+        .to(".sce-text", { 
+          opacity: 1, 
+          duration: 0.4, 
+          stagger: 0.1 
+        }, "0.6")
         
         // 2300ms: all SCE elements fade-out
         .to([sceLogoMesh.material, ".sce-text"], { 
           opacity: 0, 
-          duration: 0.5, 
+          duration: 0.4, 
           ease: "power1.in" 
         }, "2.3")
         
@@ -124,16 +239,17 @@ function PS1BootAnimation({ onAudioTrigger }: PS1BootAnimationProps) {
             sceLogoMesh.visible = false;
             sceTextContainerRef.current!.style.opacity = '0';
           }
-        }, null, ">")
+        }, [], ">")
         
         // 2700ms: background back to black
-        .to(renderer.getClearColor(), { 
+        .to(renderer.getClearColor(new THREE.Color()), { // Add temp color object
           r: 0, g: 0, b: 0, 
-          duration: 0.4, 
+          duration: 0.3, 
           ease: "power1.inOut",
           onUpdate: () => {
             if (rendererRef.current) {
-              rendererRef.current.setClearColor(renderer.getClearColor());
+              const color = renderer.getClearColor(new THREE.Color()); // Add temp color object
+              rendererRef.current.setClearColor(color, 1); // Add opacity parameter (1)
             }
           }
         }, "2.7")
@@ -142,11 +258,10 @@ function PS1BootAnimation({ onAudioTrigger }: PS1BootAnimationProps) {
         .call(() => {
           if (psLogoMesh) {
             psLogoMesh.visible = true;
-            psTextContainerRef.current!.style.opacity = '1';
-            // Trigger audio
+            // Trigger audio exactly at 3000ms "boom" moment
             onAudioTrigger();
           }
-        }, null, "3.0")
+        }, [], "3.0")
         
         // PS logo fade-in
         .to(psLogoMesh instanceof THREE.Mesh ? psLogoMesh.material : psLogoMesh.children, { 
@@ -155,19 +270,18 @@ function PS1BootAnimation({ onAudioTrigger }: PS1BootAnimationProps) {
           ease: "power1.out"
         }, "<")
         
-        // Add rotation animation for 3D model
-        .to(psLogoMesh.rotation, { 
-          y: Math.PI * 2, 
-          duration: 6, 
-          ease: "none", 
-          repeat: -1 
-        }, "<")
-        
-        // 3200ms: PlayStation text fade-in
-        .to(".ps-text", { opacity: 1, duration: 0.5, stagger: 0.1 }, "3.2")
+        // 3200ms: PS text fade-in
+        .call(() => {
+          psTextContainerRef.current!.style.opacity = '1';
+        }, [], "3.2")
+        .to(".ps-text", { 
+          opacity: 1, 
+          duration: 0.5, 
+          stagger: 0.1 
+        }, "3.2")
         
         // Hold until 6000ms, then prepare for cleanup
-        .to({}, { duration: 3.0 });
+        .to({}, { duration: 2.8 });
       
       // Start animation loop
       animate();
@@ -177,7 +291,7 @@ function PS1BootAnimation({ onAudioTrigger }: PS1BootAnimationProps) {
     function animate() {
       animationRef.current = requestAnimationFrame(animate);
       
-      // Rotate PS logo if it exists and is a 3D model
+      // Subtle rotation animation for PS logo if it's a 3D model
       if (psLogoMesh instanceof THREE.Group) {
         psLogoMesh.rotation.y += 0.01;
       }
@@ -249,9 +363,6 @@ function PS1BootAnimation({ onAudioTrigger }: PS1BootAnimationProps) {
         </div>
         <div id="scea-text-line1" className="ps-text absolute text-sm text-[#ccc] opacity-0" style={{ top: '78%' }}>
           Sony Computer Entertainment America
-        </div>
-        <div id="scea-text-line2" className="ps-text absolute text-sm text-[#ccc] opacity-0" style={{ top: '85%' }}>
-          SCEA<span className="text-xs align-super">TM</span>
         </div>
       </div>
     </div>

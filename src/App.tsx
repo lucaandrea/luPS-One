@@ -7,6 +7,7 @@ import { MetalGearSlot } from "./slots/metal-gear";
 import { NeedForSpeedSlot } from "./slots/need-for-speed";
 import { DriverSlot } from "./slots/driver";
 import { DemoDiscSlot } from "./slots/demo-disc";
+import { ChatDiscSlot } from "./slots/chat-disc";
 import { AppId } from "./config/appIds";
 
 // Dynamically import the PS1 Boot Screen to reduce initial bundle size
@@ -93,6 +94,8 @@ function App() {
         return <DriverSlot isOpen={true} onClose={() => setActiveSlot(null)} />;
       case 'demo-disc':
         return <DemoDiscSlot isOpen={true} onClose={() => setActiveSlot(null)} />;
+      case 'chat-disc':
+        return <ChatDiscSlot isOpen={true} onClose={() => setActiveSlot(null)} />;
       default:
         return null;
     }

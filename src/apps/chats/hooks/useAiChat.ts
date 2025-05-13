@@ -160,6 +160,7 @@ export function useAiChat() {
     api: "/api/chat",
     initialMessages: aiMessages, // Initialize from store
     experimental_throttle: 50,
+    streamProtocol: 'text', // Use text protocol instead of data protocol
     body: {
       systemState: getSystemState(), // Initial system state
       model: aiModel, // Pass the selected AI model

@@ -43,10 +43,10 @@ export function GranTurismoSlot({ isOpen, onClose }: GranTurismoSlotProps) {
           <h2 className="text-ps-plastic text-xl mb-4">BMW F80 M3</h2>
           <div className="relative w-full h-64 bg-gradient-to-b from-gray-900 to-black rounded-lg">
             <img 
-              src={`/assets/slots/f80-${carRotation}.png`}
+              src={`/assets/slots/f80_${carRotation.toString().padStart(3, '0')}.png`}
               alt="BMW F80 M3"
               className="w-full h-full object-contain"
-              style={{ transform: `rotate(${carRotation}deg)` }}
+              loading="lazy"
             />
             
             <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
@@ -86,19 +86,22 @@ export function GranTurismoSlot({ isOpen, onClose }: GranTurismoSlotProps) {
             <details className="mt-4 bg-ps-crt-glass/20 p-2 rounded-md">
               <summary className="text-ps-amber font-bold cursor-pointer">Audi RS4 (B7) Daytona Grey</summary>
               <div className="p-2 mt-2">
-                <div className="flex justify-center my-4">
-                  <img
-                    src="/assets/slots/rs4_0.png"
-                    alt="Audi RS4 B7"
-                    className="w-64 h-auto object-contain"
-                  />
+                <div className="grid grid-cols-4 gap-2 mb-4">
+                  {[0, 90, 180, 270].map((angle) => (
+                    <img
+                      key={angle}
+                      src={`/assets/slots/rs4_${angle}.png`}
+                      alt={`Audi RS4 B7 at ${angle}°`}
+                      className="w-full h-auto object-contain"
+                      loading="lazy"
+                    />
+                  ))}
                 </div>
                 <ul className="list-disc list-inside space-y-1 text-ps-green">
-                  <li>JHM 2.75" X-pipe cat-back exhaust</li>
-                  <li>GruppeM FRI-0194 intake system</li>
-                  <li>OEM 4.2L naturally-aspirated V8</li>
+                  <li>JHM 2.75" X-pipe cat-back</li>
+                  <li>GruppeM FRI-0194 intake</li>
                   <li className="text-gray-400 italic mt-2">
-                    Engine shares DNA with Lamborghini Gallardo / Audi R8
+                    OEM 4.2 L NA V8 lineage note "shared DNA with Lamborghini Gallardo / Audi R8"
                   </li>
                 </ul>
               </div>

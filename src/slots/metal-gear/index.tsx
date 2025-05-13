@@ -26,75 +26,48 @@ export function MetalGearSlot({ isOpen, onClose }: MetalGearSlotProps) {
       appId={MetalGearSlotData.appId as any}
     >
       <div className="bg-black text-green-400 font-mono p-4 rounded-md">
-        <div className="border border-green-400 p-4 mb-4">
-          <div className="flex items-center mb-2">
-            <div className="w-4 h-4 bg-green-400 mr-2"></div>
-            <h3 className="text-xl font-bold">CODEC TRANSMISSION</h3>
-          </div>
-          <div className="text-xs mb-2">SUBJECT: AGENT PROFILE - LUCA COLLINS</div>
-          <div className="text-xs mb-4">CLASSIFICATION: TOP SECRET</div>
+        {/* Use a single pre tag with whitespace-pre to maintain line breaks as specified in the guide */}
+        <pre 
+          className="whitespace-pre text-green-400 font-mono cursor-blink"
+          style={{ position: 'relative' }}
+        >
+{`CODEC TRANSMISSION
+SUBJECT: AGENT PROFILE — LUCA COLLINS
+CLASSIFICATION: TOP SECRET
+
+LEBANON 1992‑1995
+Earliest memories formed against backdrop of conflict.  Fighter‑jet ripples & artillery became nightly lullabies.
+
+KOSOVO 1998‑2000
+Teenage growth spurt aligned with Kosovo War.  Family dinner table doubled as war‑room & language lab.
+
+IRAQ 2003‑2005
+Identity‑forming years shadowed by Iraq invasion.  Seed of entrepreneurial itch germinated between air‑raid sirens.
+
+TRANSMISSION BEGINS…
+> Childhood exposure to conflict zones forged unusual pattern‑recognition.
+> Subject exhibits abnormal comfort with chaos & uncertainty.
+> Multilingual skill‑tree unlocked as survival perk.
+> Analytical bent links early trauma to later product strategy.
+> "Sirens make odd lullabies." — AGENT QUOTE
+
+END TRANSMISSION`}
+        </pre>
+
+        {/* Add a style tag for the cursor blink animation */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          .cursor-blink::after {
+            content: '_';
+            position: absolute;
+            animation: blink 1s step-end infinite;
+          }
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="border-l-2 border-green-400 pl-4">
-              <h4 className="text-green-400 font-bold mb-2">LEBANON 1992-1995</h4>
-              <p className="text-sm text-green-300">
-                Earliest memories formed against backdrop of conflict. 
-                The constant sounds of fighter jets and artillery created unusual 
-                soundscape of childhood. Reports indicate subject developed 
-                advanced pattern recognition at young age.
-              </p>
-            </div>
-            
-            <div className="border-l-2 border-green-400 pl-4">
-              <h4 className="text-green-400 font-bold mb-2">KOSOVO 1998-2000</h4>
-              <p className="text-sm text-green-300">
-                Teenage years coincided with Kosovo War. Exposed to international 
-                news coverage and humanitarian relief discussions. Developed 
-                interest in global politics and language acquisition.
-              </p>
-            </div>
-            
-            <div className="border-l-2 border-green-400 pl-4">
-              <h4 className="text-green-400 font-bold mb-2">IRAQ 2003-2005</h4>
-              <p className="text-sm text-green-300">
-                Iraq War during critical identity-forming years. Subject became 
-                increasingly interested in global politics and business impacts 
-                of international conflicts. Early signs of entrepreneurial tendencies.
-              </p>
-            </div>
-          </div>
-        </div>
-          
-        <div className="text-xs text-green-200 mb-4">
-          TRANSMISSION BEGINS...
-        </div>
-        
-        {/* Typewriter effect simulation */}
-        <div className="font-mono text-sm leading-relaxed">
-          <p className="mb-2">&gt; Childhood exposure to conflict zones shaped unique perspective.</p>
-          <p className="mb-2">&gt; Subject demonstrates unusual comfort with chaos and uncertainty.</p>
-          <p className="mb-2">&gt; Multilingual capabilities developed as survival mechanism.</p>
-          <p className="mb-2">&gt; Analytical patterns suggest connection between early experiences and later entrepreneurial ventures.</p>
-          <p className="mb-2 blink-cursor">&gt; "Sirens make odd lullabies." - AGENT QUOTE</p>
-        </div>
-        
-        <div className="text-xs text-green-200 mt-4">
-          END TRANSMISSION
-        </div>
+          @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+          }
+        `}} />
       </div>
-      
-      {/* Static CSS for Metal Gear screen */}
-      <style jsx>{`
-        .blink-cursor::after {
-          content: '_';
-          animation: blink 1s step-end infinite;
-        }
-        
-        @keyframes blink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0; }
-        }
-      `}</style>
     </SaveModal>
   );
 }

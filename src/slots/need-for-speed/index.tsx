@@ -1,10 +1,10 @@
 import { SaveModal } from '@/components/SaveModal/SaveModal';
-import { AppId } from '@/config/appIds';
+import { useSound, Sounds } from '@/hooks/useSound';
 
 interface NeedForSpeedSlotProps {
   isOpen: boolean;
   onClose: () => void;
-  openDemoDisc?: () => void; // Make it optional
+  openDemoDisc?: () => void; // Function to open demo disc slot
 }
 
 // Define slot data separately from component
@@ -19,9 +19,14 @@ const slotData = {
 export const NeedForSpeedSlotData = slotData;
 
 export function NeedForSpeedSlot({ isOpen, onClose, openDemoDisc }: NeedForSpeedSlotProps) {
+  const { play: playButton } = useSound(Sounds.BUTTON_CLICK, 0.4);
+  
   const handleOpenDemoDisc = () => {
-    onClose();
     if (openDemoDisc) {
+      playButton();
+      onClose(); // Close this modal first
+      
+      // Open the demo disc with a small delay for better UX
       setTimeout(() => {
         openDemoDisc();
       }, 300);
@@ -36,51 +41,63 @@ export function NeedForSpeedSlot({ isOpen, onClose, openDemoDisc }: NeedForSpeed
       onClose={onClose}
       appId={NeedForSpeedSlotData.appId as any}
     >
-      <div className="flex flex-col items-center gap-8 p-4">
-        <div className="w-full max-w-2xl bg-gradient-to-r from-ps-red/50 via-ps-amber/30 to-ps-red/50 p-6 rounded-lg">
-          <h2 className="text-2xl text-white font-bold mb-6 text-center">Prototype Fast Lane</h2>
-          
-          <p className="text-gray-200 mb-8 text-center">
-            A high-speed gateway to Luca's prototype collection. Explore live demos, experiments, 
-            and proof-of-concepts across AI, web, and product development.
-          </p>
-          
-          <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center justify-center h-full text-center">
+        <div className="max-w-2xl mx-auto bg-gradient-to-r from-ps-red via-ps-amber to-ps-green p-0.5 rounded-xl">
+          <div className="bg-gray-900 p-8 rounded-xl">
+            <h2 className="text-3xl font-bold text-white mb-6">Prototype Gallery</h2>
+            
+            <p className="text-xl text-gray-300 mb-8">
+              Explore Luca's prototype projects and experimental builds in the
+              <span className="text-ps-cyan font-bold mx-1">Demo Disc</span> gallery.
+            </p>
+            
+            <div className="grid grid-cols-3 gap-8 mb-8">
+              <div className="aspect-square bg-black/40 rounded-lg overflow-hidden flex items-center justify-center">
+                <img 
+                  src="/assets/slots/demos/crewai.gif" 
+                  alt="CrewAI Tester"
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+              
+              <div className="aspect-square bg-black/40 rounded-lg overflow-hidden flex items-center justify-center">
+                <img 
+                  src="/assets/slots/demos/notesgpt.gif" 
+                  alt="NotesGPT"
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+              
+              <div className="aspect-square bg-black/40 rounded-lg overflow-hidden flex items-center justify-center">
+                <img 
+                  src="/assets/slots/demos/prompt-bible.gif" 
+                  alt="Prompt Bible"
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+            
             <button
               onClick={handleOpenDemoDisc}
-              className="relative bg-ps-amber hover:bg-ps-amber/90 text-black font-bold py-3 px-8 rounded-sm transform transition-transform hover:scale-105 active:scale-95"
-              aria-label="Open Demo Disc prototype gallery"
+              disabled={!openDemoDisc}
+              className={`
+                px-8 py-4 rounded-lg text-lg font-bold shadow-lg
+                ${openDemoDisc 
+                  ? 'bg-gradient-to-r from-ps-red to-ps-amber text-white cursor-pointer hover:shadow-xl hover:scale-105 transition-transform'
+                  : 'bg-gray-700 text-gray-400 cursor-not-allowed'}
+              `}
             >
-              <div className="absolute -inset-[2px] border border-white/50 rounded-sm pointer-events-none"></div>
-              ENTER PROTOTYPE GALLERY
+              Open Demo Disc
             </button>
             
-            <p className="text-gray-300 mt-6 text-sm">
-              Press <span className="bg-ps-plastic/20 text-ps-plastic rounded px-1">X</span> on the Demo Disc slot to access directly
-            </p>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-2xl mt-4">
-          <div className="bg-black/50 p-4 rounded-lg">
-            <h3 className="text-ps-red font-bold mb-2">CrewAI Tester</h3>
-            <p className="text-sm text-gray-300">
-              Multi-agent prompt experimentation platform for orchestrating AI agent workflows.
-            </p>
-          </div>
-          
-          <div className="bg-black/50 p-4 rounded-lg">
-            <h3 className="text-ps-amber font-bold mb-2">NotesGPT</h3>
-            <p className="text-sm text-gray-300">
-              Voice-powered note-taking with real-time transcription and AI summarization.
-            </p>
-          </div>
-          
-          <div className="bg-black/50 p-4 rounded-lg">
-            <h3 className="text-ps-cyan font-bold mb-2">Prompt Bible</h3>
-            <p className="text-sm text-gray-300">
-              100+ markdown prompt patterns organized by use case with version control.
-            </p>
+            {!openDemoDisc && (
+              <p className="text-gray-500 mt-4 text-sm">
+                (Demo disc navigation is not available in this session)
+              </p>
+            )}
           </div>
         </div>
       </div>

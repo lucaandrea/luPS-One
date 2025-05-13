@@ -12,7 +12,7 @@ interface SaveModalProps {
   children: React.ReactNode;
 }
 
-export function SaveModal({ title1, title2, isOpen, onClose, appId, children }: SaveModalProps) {
+export function SaveModal({ title1, title2, isOpen, onClose, appId: _appId, children }: SaveModalProps) {
   const [isAnimating, setIsAnimating] = useState(false);
   const { play: playOpen } = useSound(Sounds.WINDOW_OPEN);
   const { play: playClose } = useSound(Sounds.WINDOW_CLOSE);
@@ -32,9 +32,10 @@ export function SaveModal({ title1, title2, isOpen, onClose, appId, children }: 
     }
   }, [isOpen, playOpen]);
   
-  // Handle escape key to close
+  // Handle key navigation and close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Back keys: Escape, Square symbol, Backspace, C key
       if (e.key === "Escape" ||
           e.key === "□" ||
           e.key === "Backspace" ||
@@ -61,15 +62,27 @@ export function SaveModal({ title1, title2, isOpen, onClose, appId, children }: 
         className={`
         p-0 rounded-lg border-2 border-ps-plastic
         bg-ps-crt-glass max-w-4xl w-[95%] h-[80vh]
-        overflow-hidden shadow-2xl
+        overflow-hidden shadow-[0_0_4px_#000]
         ${isAnimating ? 'animate-in zoom-in-90 duration-300' : ''}
-      `}>
-        {/* CRT Frame */}
+      `}
+        style={{
+          backgroundImage: `url('/assets/ui/mcard_plastic.png')`,
+          backgroundRepeat: 'repeat',
+          backgroundSize: '256px'
+        }}
+      >
+        {/* Memory Card Frame */}
         <div className="relative flex flex-col h-full overflow-hidden">
-          {/* Title Bar */}
-          <div className="bg-ps-plastic py-2 px-4 flex items-center justify-between">
-            <DialogTitle className="text-black font-bold">
-              {title1} <span className="text-sm uppercase">{title2}</span>
+          {/* Title Bar with card plastic texture */}
+          <div className="bg-[#bdbdbd] py-2 px-4 flex items-center justify-between border-b border-gray-700">
+            <DialogTitle className="text-black font-bold flex items-center">
+              {/* Two embossed screws */}
+              <div className="w-4 h-4 rounded-full bg-[#a0a0a0] border border-[#909090] shadow-inner mr-3"></div>
+              
+              {title1} <span className="text-sm uppercase ml-1">{title2}</span>
+              
+              {/* Second screw */}
+              <div className="w-4 h-4 rounded-full bg-[#a0a0a0] border border-[#909090] shadow-inner ml-3"></div>
             </DialogTitle>
             
             <button 
@@ -81,17 +94,27 @@ export function SaveModal({ title1, title2, isOpen, onClose, appId, children }: 
             </button>
           </div>
           
+          {/* Memory Card LED Indicators (3-block grid) */}
+          <div className="bg-[#bdbdbd] px-4 py-2 flex space-x-2 border-b border-gray-700">
+            <div className="w-6 h-3 bg-[#8d8d8d] rounded-sm"></div>
+            <div className="w-6 h-3 bg-[#8d8d8d] rounded-sm"></div>
+            <div className="w-6 h-3 bg-[#8d8d8d] rounded-sm"></div>
+          </div>
+          
           {/* Modal Content */}
           <div id="modal-description" className="flex-1 bg-gradient-to-b from-gray-800 to-black p-6 overflow-auto text-white">
             {children}
           </div>
           
-          {/* Controls Bar */}
-          <div className="bg-ps-plastic py-2 px-4 flex items-center justify-end gap-4">
-            <span className="text-xs text-black">
+          {/* Controls Bar with PS1 style */}
+          <div className="bg-[#bdbdbd] py-2 px-4 flex items-center justify-end gap-4">
+            <span className="text-xs text-black bg-[#a0a0a0] px-2 py-1 rounded">
+              <span className="border border-black px-1">▲▼◀▶</span> Navigate
+            </span>
+            <span className="text-xs text-black bg-[#a0a0a0] px-2 py-1 rounded">
               <span className="border border-black px-1">X</span> Select
             </span>
-            <span className="text-xs text-black">
+            <span className="text-xs text-black bg-[#a0a0a0] px-2 py-1 rounded">
               <span className="border border-black px-1">□</span> Back
             </span>
           </div>
